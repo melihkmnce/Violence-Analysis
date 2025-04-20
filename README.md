@@ -32,8 +32,8 @@ This project is a deep learning-based violence detection system that analyzes vi
   Dataset Link: [Kaggle: Real Life Violence Situations Dataset] (https://www.kaggle.com/datasets/mohamedmustafa/real-life-violence-situations-dataset)
 
 Expected structure:
-
-```dataset/
+```
+dataset/
   violence/
     V_1.mp4
     V_2.mp4
