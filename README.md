@@ -66,6 +66,10 @@ Main tasks:
 - Runs prediction on each frame and averages the results
 - Displays a probability score indicating whether the video contains violence
 
+---
+## Demo
+
+![App Screenshot](screenshots/gui-example.png)
 
 
 
