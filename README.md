@@ -3,7 +3,9 @@
 This project is a deep learning-based violence detection system that analyzes video footage and predicts whether a fight is occurring. A CNN model is trained on extracted video frames and a Streamlit interface allows users to upload and test any video.
 
 ---
+## Preview
 
+![App Screenshot](screenshots/gui-example.png)
 
 ---
 
@@ -65,11 +67,3 @@ Main tasks:
 - Reads uploaded videos and extracts 1 frame per second
 - Runs prediction on each frame and averages the results
 - Displays a probability score indicating whether the video contains violence
-
----
-## Preview
-
-![App Screenshot](screenshots/gui-example.png)
-
-
-
