@@ -67,7 +67,7 @@ Main tasks:
 - Displays a probability score indicating whether the video contains violence
 
 ---
-## Demo
+## Preview
 
 ![App Screenshot](screenshots/gui-example.png)
 
