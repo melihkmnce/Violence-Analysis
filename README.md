@@ -23,7 +23,7 @@ In addition to video upload functionality, the system now supports **Real-Time C
 - Real-time camera stream integration (via IP Webcam)
 - Live violence detection with prediction overlays
 - Automatic alarm sound if violence is detected
-- Auto-records violent moments into timestamped ".avi" files
+- Auto-records violent moments into timestamped ".avi" files to the "videos" folder.
 - Date and time printed on each video frame for logs
 
 ---
