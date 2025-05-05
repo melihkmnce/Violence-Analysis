@@ -9,7 +9,7 @@ from datetime import datetime
 import pygame
 import os
 
-# =============== THREAD TABANLI KAMERA SINIFI ===============
+# =============== THREAD BASED CAMERA CLASS ===============
 class VideoStream:
     def __init__(self, src):
         self.src = src
@@ -33,7 +33,7 @@ class VideoStream:
         self.stopped = True
         self.stream.release()
 
-# =============== MODEL ve AYARLAR ===============
+# =============== MODELS AND SETTINGS ===============
 model = load_model("violence_detection_model.h5")
 font_path = "C:/Windows/Fonts/arial.ttf"
 font = ImageFont.truetype(font_path, 32)
@@ -47,23 +47,23 @@ alarm_played = False
 
 pygame.mixer.init()
 
-# Video kayıt ayarları
+# Video recording settings
 recording = False
 out = None
 
-# =============== KAMERA BAĞLANTISI YAPISI ===============
+# =============== CAMERA CONNECTION STRUCTURE ===============
 def connect_camera(ip_url):
-    print("[INFO] Kameraya bağlanılıyor...")
+    print("[INFO] Connecting to camera...")
     try:
         stream = VideoStream(ip_url).start()
         time.sleep(2)
         test_frame = stream.read()
         if test_frame is None or test_frame.size == 0:
-            raise Exception("Görüntü alınamıyor.")
-        print("[INFO] Kamera bağlantısı başarılı.")
+            raise Exception("Image cannot be acquired.")
+        print("[INFO] Camera connection SUCCESSFUL.")
         return stream
     except Exception as e:
-        print(f"[HATA] Bağlantı kurulamadı: {e}")
+        print(f"[ERROR] Connection FAILED: {e}")
         return None
 
 ip = "192.168.1.27"
@@ -74,7 +74,7 @@ missing_frame_count = 0
 # =============== ANA DÖNGÜ ===============
 while True:
     if vs is None:
-        print("[Uyarı] Tekrar bağlantı deneniyor...")
+        print("[Warning] Trying to connect again...")
         time.sleep(5)
         vs = connect_camera(camera_url)
         continue
@@ -82,11 +82,11 @@ while True:
     frame = vs.read()
     if frame is None:
         missing_frame_count += 1
-        print(f"[Uyarı] Kare alınamadı. ({missing_frame_count}/5)")
+        print(f"[Warning] Could not capture the frame. ({missing_frame_count}/5)")
         time.sleep(1)
 
         if missing_frame_count >= 5:
-            print("[Uyarı] Kare alınamadı. Bağlantı sıfırlanıyor.")
+            print("[Warning] Could not get frame. Resetting connection.")
             vs.stop()
             vs = None
             missing_frame_count = 0
@@ -109,10 +109,10 @@ while True:
 
         avg_pred = np.mean(prediction_history)
 
-    # Yazıyı belirle
+    # Set text
     timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
     if avg_pred > 0.7:
-        text = f"ŞİDDET TESPİT EDİLDİ (%{avg_pred * 100:.1f})"
+        text = f"VIOLENCE DETECTED (%{avg_pred * 100:.1f})"
         color = (255, 0, 0)
 
         if not alarm_played:
@@ -120,9 +120,11 @@ while True:
             pygame.mixer.music.play()
             alarm_played = True
 
+            # Writing to "log.txt" file when violence is detected.
             with open("log.txt", "a") as log:
-                log.write(f"[{datetime.now()}] Şiddet tespit edildi. Tahmin: %{avg_pred * 100:.1f}\n")
+                log.write(f"[{datetime.now()}] Violence detected. Prediction: %{avg_pred * 100:.1f}\n")
 
+            # Video recording when violence is detected.
             os.makedirs("videos", exist_ok=True)
             date_folder = datetime.now().strftime("%d-%m-%Y")
             folder_path = os.path.join("videos", date_folder)
@@ -133,33 +135,32 @@ while True:
             recording = True
 
     elif avg_pred > 0.4:
-        text = f"ŞÜPHELİ HAREKET (%{avg_pred * 100:.1f})"
+        text = f"SUSPICIOUS ACTION (%{avg_pred * 100:.1f})"
         color = (255, 255, 0)
         alarm_played = False
         if recording:
             out.release()
             recording = False
     else:
-        text = f"Şiddet Yok (%{(1 - avg_pred) * 100:.1f})"
+        text = f"No Violence (%{(1 - avg_pred) * 100:.1f})"
         color = (0, 255, 0)
         alarm_played = False
         if recording:
             out.release()
             recording = False
 
-    # Türkçe yazı ekle
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     img_pil = Image.fromarray(frame_rgb)
     draw = ImageDraw.Draw(img_pil)
     draw.text((10, 30), f"{text} - {timestamp}", font=font, fill=color)
     frame_with_text = cv2.cvtColor(np.array(img_pil), cv2.COLOR_RGB2BGR)
 
-    # Video kaydı varsa yaz
+    # If there is a video recording, write.
     if recording:
         out.write(frame)
 
-    # Görüntü göster
-    cv2.imshow("Şiddet Tespiti (Canlı)", cv2.resize(frame_with_text, (960, 540)))
+    # Show view
+    cv2.imshow("Violence Detection (Live)", cv2.resize(frame_with_text, (960, 540)))
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
